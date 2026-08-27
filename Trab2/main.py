@@ -8,59 +8,49 @@ pygame.font.init()
 WIDTH   =  800; HEIGHT =  600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  
 
-# caso precise de usar fontes na main, descomente
+relogio = pygame.time.Clock()
+grid_size = (10, 10)
+grid = Grid(0, 0, None, grid_size)
 
-#font_size
-#font = pygame.font.Font(None, font_size)
-
-# caso precise carregar imagens na main, descomente
-
-#idle = pygame.image.load("images/duck/duck.png").convert_alpha()
-#step = pygame.image.load("images/duck/step.png").convert_alpha()
-#etc
-
-
-#numero de celulas
-grid_size = (5, 10)
-
-
-# Cria a janela
 WIDTH   =  800; HEIGHT =  600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  
 
-#criar objetos, adicione eles a lista
 objects = []
 
 while True: 
+    relogio.tick(5)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
 
-        # uso do mouse é obrigatório
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if pygame.mouse.get_pressed()[0]: # 0 botão esquedo 2, direito
-                pass # faça algo
+            if pygame.mouse.get_pressed()[0]:
+                if grid.botao_pausa.collidepoint(event.pos):
+                    grid.pausado = not grid.pausado
+                elif grid.game_over and grid.botao_reiniciar.collidepoint(event.pos):
+                    grid.reiniciar()
 
-        #caso queira usar levantar o mouse, descomente
-        #elif event.type == pygame.MOUSEBUTTONUP:
-        #                    exit()
-
-
-        # uso do teclado para controle é obrigatório
         elif event.type == pygame.KEYDOWN:
-            #inclua outras funcionalidades para outras téclas
             if event.key == pygame.K_ESCAPE:
                 exit()
+            if event.key == pygame.K_w:
+                grid.definir_direcao(-1, 0)
+            if event.key == pygame.K_s:
+                grid.definir_direcao(1, 0)
+            if event.key == pygame.K_a:
+                grid.definir_direcao(0, -1)
+            if event.key == pygame.K_d:
+                grid.definir_direcao(0, 1)
 
-        #atualiza
-        for obj in objects:
-            obj.update(1)
+    for obj in objects:
+        obj.update(1)
 
-        # Desenha
-        screen.fill((30, 30, 30))
+    grid.update(1)
 
+    screen.fill((30, 30, 30))
 
-        for obj in objects:
-            obj.draw()
+    for obj in objects:
+        obj.draw()
 
-        pygame.display.flip()
+    grid.draw(screen)
+    pygame.display.flip()
