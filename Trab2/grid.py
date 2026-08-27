@@ -41,6 +41,7 @@ class Grid(obj):
         self.botao_pausa = pygame.Rect(600, 20, 150, 40)
         self.botao_reiniciar = pygame.Rect(600, 80, 150, 40)
         self.fonte = pygame.font.SysFont("arial", 35, True, True)
+        self.pontos = 0
         self.reiniciar()
 
     def draw(self, screen):
@@ -50,7 +51,9 @@ class Grid(obj):
         cor_botao = (100, 100, 200) if not self.pausado else (200, 100, 100)
         pygame.draw.rect(screen, cor_botao, self.botao_pausa)
         texto_pause = self.fonte.render("PAUSE", True, (255, 255, 255))
+        texto_pontos = self.fonte.render(f"Pontuação = {self.pontos}", True, (255,255,255))
         screen.blit(texto_pause, (625, 20))
+        screen.blit(texto_pontos, (150, 520))
 
         if self.game_over:
             texto_game_over = self.fonte.render("GAME OVER (Aperte para reiniciar)", True, (255, 255, 255))
@@ -82,6 +85,7 @@ class Grid(obj):
         if comeu:
             self.maca_pos = self.gerar_posicao_maca()
             self.cells[self.maca_pos[0]][self.maca_pos[1]].estado = "maca"
+            self.pontos += 1
         else:
             rabo_linha, rabo_coluna = self.cobra[0]
             self.cells[rabo_linha][rabo_coluna].estado = "vazia"
@@ -118,6 +122,7 @@ class Grid(obj):
 
         self.game_over = False
         self.pausado = True
+        self.pontos = 0
 
 
 class Cell(obj):
