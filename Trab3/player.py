@@ -1,13 +1,31 @@
 import pygame
+import os
 from abc import ABC, abstractmethod
+from projectile import Projectile
+
+SPRITE_DIR = os.path.join("images", "duck")
+
+def load_sprite(name):
+    path = os.path.join(SPRITE_DIR, f"{name}.png")
+    return pygame.image.load(path).convert_alpha()
+
+INVENCIBILIDADE_DURACAO = 1.0
+FLICKER_INTERVALO = 0.1
+
 
 class Player:
 
-    def __init__(self, pos):
-        self.pos = pos
-        self.state = ExampleState(self)
+    def __init__(self, pos, max_hp=3):
+        self.pos = pygame.Vector2(pos)
+        self.max_hp = max_hp
+        self.hp = max_hp
+        self.state = Base(self)
+        self.new_projectiles = []
+        self.invincible_timer = 0.0
 
     def update(self, dt):
+        if self.invincible_timer > 0:
+            self.invincible_timer -= dt
         self.state.update(dt)
 
     def draw(self, screen):
@@ -23,55 +41,104 @@ class Player:
         self.state.delete()
         self.state = new_state(self)
 
-#função acessória
-def colored_sprite(color, size=(32, 32)):
-    sprite = pygame.Surface(size)
-    sprite.fill(color)
-    return sprite
+    def take_damage(self, amount):
+        if self.invincible_timer > 0 or isinstance(self.state, Morto):
+            return
+        self.hp -= amount
+        if self.hp <= 0:
+            self.hp = 0
+            self.change_state(Morto)
+        else:
+            self.invincible_timer = INVENCIBILIDADE_DURACAO
+
+    def collect_new_projectiles(self):
+        pending = self.new_projectiles
+        self.new_projectiles = []
+        return pending
 
 
 class PlayerState(ABC):
 
-    # Sprite é comum a classe estado
     sprite = pygame.Surface((32, 32))
+    hurt_sprite = None
 
     def __init__(self, player):
         self.P = player
 
     def draw(self, screen):
-        screen.blit(self.sprite, self.P.pos)
+        sprite = self.sprite
+        if self.P.invincible_timer > 0 and self.hurt_sprite is not None:
+            if int(self.P.invincible_timer / FLICKER_INTERVALO) % 2 == 0:
+                sprite = self.hurt_sprite
+        screen.blit(sprite, self.P.pos)
 
     def delete(self):
-        pass  # se precisar apagar algo na mudança de estados
+        pass
 
     @abstractmethod
     def update(self, dt):
         pass
 
     @abstractmethod
-    def action_1(self, dt):
-        pass
-
-    @abstractmethod
-    def action_2(self, dt):
-        pass
-
-
-class ExampleState(PlayerState):
-
-    # Sempre aqui para o estados, mesmo que descarregue
-    # sprite = pygame.image.load("images/duck/base.png")
-
-    # ALternativamente, use em retângulo
-    sprite = colored_sprite((255, 0, 0))
-
-    def update(self, dt):
-        pass  # faça sua implementação
-    
     def action_1(self):
-        print("faz a ação 1")
-        pass # faça sua implementação
+        pass
+
+    @abstractmethod
+    def action_2(self):
+        pass
+
+
+class Base(PlayerState):
+    sprite = load_sprite("base")
+    hurt_sprite = load_sprite("quack")
+
+    def update(self, dt):
+        pass
+
+    def action_1(self):
+        self.P.change_state(Atirando)
 
     def action_2(self):
-        print("faz a ação 2")
-        pass # faça sua implementação
+        self.P.take_damage(1)  # TEMPORÁRIO: só pra validar visualmente
+
+
+class Atirando(PlayerState):
+    sprite = load_sprite("wing")
+    hurt_sprite = load_sprite("quack")
+    FIRE_RATE = 0.3
+
+    def __init__(self, player):
+        super().__init__(player)
+        self.timer = 0
+
+    def update(self, dt):
+        self.timer -= dt
+        if self.timer <= 0:
+            self.timer = self.FIRE_RATE
+            self._fire()
+
+    def _fire(self):
+        mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        direcao = mouse_pos - self.P.pos
+        if direcao.length() > 0:
+            direcao = direcao.normalize()
+        self.P.new_projectiles.append(Projectile(self.P.pos, direcao))
+
+    def action_1(self):
+        self.P.change_state(Base)
+
+    def action_2(self):
+        self.P.take_damage(1)  # TEMPORÁRIO
+
+
+class Morto(PlayerState):
+    sprite = load_sprite("crouch")
+
+    def update(self, dt):
+        pass
+
+    def action_1(self):
+        pass
+
+    def action_2(self):
+        pass
