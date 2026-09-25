@@ -1,6 +1,7 @@
 import pygame
 import os
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from projectile import Projectile
 
 SPRITE_DIR = os.path.join("images", "duck")
@@ -12,6 +13,9 @@ def load_sprite(name):
 INVENCIBILIDADE_DURACAO = 1.0
 FLICKER_INTERVALO = 0.1
 
+=======
+from util import colored_sprite
+>>>>>>> upstream/main
 
 class Player:
 
@@ -41,6 +45,7 @@ class Player:
         self.state.delete()
         self.state = new_state(self)
 
+<<<<<<< HEAD
     def take_damage(self, amount):
         if self.invincible_timer > 0 or isinstance(self.state, Morto):
             return
@@ -56,6 +61,8 @@ class Player:
         self.new_projectiles = []
         return pending
 
+=======
+>>>>>>> upstream/main
 
 class PlayerState(ABC):
 
@@ -80,6 +87,28 @@ class PlayerState(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
+=======
+    def action_1(self, dt):
+        pass
+
+    @abstractmethod
+    def action_2(self, dt):
+        pass
+
+
+class ExampleState(PlayerState):
+
+    # Sempre aqui para o estados, mesmo que descarregue
+    # sprite = pygame.image.load("images/duck/base.png")
+
+    # ALternativamente, use em retângulo
+    sprite = colored_sprite((0, 255, 0))
+
+    def update(self, dt):
+        pass  # faça sua implementação
+    
+>>>>>>> upstream/main
     def action_1(self):
         pass
 

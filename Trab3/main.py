@@ -1,4 +1,5 @@
 import pygame
+<<<<<<< HEAD
 
 pygame.init()
 WIDTH = 800; HEIGHT = 600
@@ -11,6 +12,26 @@ from enemy import Enemy
 from events import EventHandler
 from wave_manager import WaveManager
 from projectile import Projectile
+=======
+from player import Player
+from bullet import sinBullet
+from util import EventHandler
+
+#inicialização
+
+pygame.init()
+WIDTH   =  800; HEIGHT =  600
+clock = pygame.time.Clock()
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))  
+player = Player((50, 50))
+b = sinBullet((400, 300), -45, life_time=240) 
+
+objects = []
+objects.append(player)
+objects.append(b)
+
+>>>>>>> upstream/main
 
 clock = pygame.time.Clock()
 font_big = pygame.font.SysFont(None, 64)
@@ -38,19 +59,34 @@ def handle_input():
             exit()
 
         elif event.type == pygame.KEYDOWN:
+<<<<<<< HEAD
             if game_over:
                 if event.key == pygame.K_r:
                     player, handler, wave_manager, objects = new_game()
                     game_over = False
                 continue
 
+=======
+            if event.key == pygame.K_SPACE:
+                player.action_1() # pode ser melhorado para evento
+>>>>>>> upstream/main
             if event.key == pygame.K_TAB:
-                player.action_2()
+                player.action_2() # pode ser melhorado para evento
 
+<<<<<<< HEAD
         elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
             player.action_1()
         elif event.type == pygame.MOUSEBUTTONUP and not game_over:
             player.action_1()
+=======
+def remove_obj(obj):
+    #variavel global é feio, mas serve como um exemplo
+    if obj in objects:
+        objects.remove(obj) 
+
+#inscreve esse metodo pra remoção de objetos
+EventHandler().subscribe("DestroyObj", remove_obj)
+>>>>>>> upstream/main
 
 
 running = True
@@ -84,6 +120,7 @@ while running:
     screen.fill((30, 30, 30))
     for obj in objects:
         obj.draw(screen)
+<<<<<<< HEAD
 
     if game_over:
         texto = font_big.render("GAME OVER", True, (255, 255, 255))
@@ -95,3 +132,9 @@ while running:
         screen.blit(texto2, rect2)
 
     pygame.display.flip()
+=======
+    
+    pygame.display.flip()
+    clock.tick(60)
+    
+>>>>>>> upstream/main
